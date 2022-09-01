@@ -11,7 +11,7 @@ wxEND_EVENT_TABLE()
 
 
 //if using output, change to wxSize(340, 400)
-cFrame::cFrame() : wxFrame(nullptr, wxID_ANY, "Argus Update - Erasca", wxPoint(100, 100), wxSize(340, 130), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
+cFrame::cFrame() : wxFrame(nullptr, wxID_ANY, "Nanostring Data Format - Erasca", wxPoint(100, 100), wxSize(340, 130), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
 	btn1 = new wxButton(this, 10001, "Format", wxPoint(10, 50), wxSize(150, 30));
 	labelText = new wxStaticText(this, wxID_ANY, "Target Sheet: ", wxPoint(165, 57));
