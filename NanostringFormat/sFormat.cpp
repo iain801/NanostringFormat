@@ -1,6 +1,8 @@
 #include "sFormat.h"
-#include <algorithm>
 #include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <unordered_set>
 
 using namespace libxl;
 
@@ -115,6 +117,8 @@ void sFormat::CopySheet()
 		}
 	}
 	//TODO: Column sorting
+	initFilter();
+	
 }
 
 void sFormat::initCols()
@@ -140,6 +144,25 @@ void sFormat::initCols()
 	outSheet->writeStr(0, 9, L"Gene Name", header);
 	outSheet->writeStr(0, 10, L"RefSeq Number", header);
 	outSheet->writeStr(0, 11, L"Normalized Nanostring Data", header);
+}
+
+void sFormat::initFilter()
+{
+	AutoFilter* autoFilter = outSheet->autoFilter();
+	autoFilter->setRef(outSheet->firstFilledRow(), outSheet->lastFilledRow(),
+		outSheet->firstFilledCol(), outSheet->lastFilledCol());
+	
+	for (int col = outSheet->firstFilledCol(); col < outSheet->lastFilledCol(); col++)
+	{
+		FilterColumn* filter = autoFilter->column(col);
+		std::unordered_set<std::wstring> elements;
+		for (int row = outSheet->firstFilledRow() + 1; row < outSheet->lastFilledRow(); row++)
+			elements.insert(getCellString(outSheet, row, col));
+		for (auto it = elements.begin(); it != elements.end(); it++)
+			filter->addFilter((*it).c_str());
+	}
+
+	outSheet->applyFilter();
 }
 
 void sFormat::CopyCell(int row, int col)
@@ -223,4 +246,26 @@ sFormat::parsedSample::parsedSample(std::wstring SID) :
 	visit = sampleID.substr(i, l);
 	i += l;
 	timepoint = sampleID.substr(++i);
+}
+
+std::wstring sFormat::getCellString(libxl::Sheet* sheet, int row, int col)
+{
+	std::wstring text = L"";
+	CellType type = sheet->cellType(row, col);
+	if (sheet->isDate(row, col))
+	{
+		double val = sheet->readNum(row, col);
+		int year, month, day;
+		output->dateUnpack(val, &year, &month, &day);
+
+		std::wstringstream ss;
+		ss << std::setfill(L'0');
+		ss << std::setw(2) << month << L"/" << day << L"/" << year;
+		text = ss.str();
+	}
+	else if (type == CELLTYPE_BLANK || type == CELLTYPE_EMPTY)
+		text = L"Blank";
+	else
+		text = sheet->readStr(row, col);
+	return text;
 }

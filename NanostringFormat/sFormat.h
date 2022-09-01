@@ -1,7 +1,6 @@
 #pragma once
 #include "libxl.h"
 #include <string>
-#include <list>
 
 class sFormat
 {
@@ -43,5 +42,7 @@ private:
 	int getSheet(libxl::Book* book, std::wstring label);
 	void initFormats();
 	void initCols();
+	void initFilter();
+	std::wstring getCellString(libxl::Sheet* sheet, int row, int col);
 };
 
