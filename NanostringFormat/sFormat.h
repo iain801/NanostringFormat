@@ -19,6 +19,7 @@ private:
 		std::wstring patientID,
 			visit,
 			timepoint;
+		std::wstring sampleID;
 
 		parsedSample(std::wstring sampleID);
 	};
@@ -30,10 +31,17 @@ private:
 	libxl::Book* output = nullptr;
 	libxl::Sheet* outSheet = nullptr;
 
+	libxl::Format* header = nullptr;
+	libxl::Format* normal = nullptr;
+	libxl::Format* number = nullptr;
+	libxl::Format* date = nullptr;
+
 	std::wstring sheetLabel;
 
 	void CopyCell(int row, int col);
 	void CopyCell(int srcRow, int destRow, int srcCol, int destCol);
 	int getSheet(libxl::Book* book, std::wstring label);
+
+	void initFormats();
 };
 
