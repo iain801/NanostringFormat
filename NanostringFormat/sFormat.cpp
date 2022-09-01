@@ -29,12 +29,12 @@ sFormat::sFormat(std::wstring srcPath, std::wstring sheetLabel)
 	output = xlCreateXMLBook();
 	output->setKey(L"Iain Weissburg", L"windows-2a242a0d01cfe90a6ab8666baft2map2");
 
-	initFormats();
+	
 }
 
 sFormat::~sFormat() {
 	output->save(srcPath.replace(srcPath.find(L".xls"), 4, L"_processed.xls").c_str());
-	
+
 	src->release();
 	output->release();
 }
@@ -88,14 +88,46 @@ void sFormat::CopySheet()
 {
 	srcSheet = src->getSheet(getSheet(src, sheetLabel));
 	outSheet = output->addSheet(sheetLabel.c_str());
-	
-	outSheet->setCol(0,1, 40);
+
+	initFormats();
+	initCols();
+
+	int outRow = 1;
+	for (int col = 3; col < srcSheet->lastFilledCol(); col++)
+	{
+		parsedSample parse(srcSheet->readStr(2, col));
+		for (int row = 15; row < srcSheet->lastFilledRow(); row++)
+		{
+			CopyCell(0, outRow, col, 0);							// Source File Name
+			outSheet->writeStr(outRow, 1, parse.sampleID.c_str(), normal);	// Sample ID
+			outSheet->writeNum(outRow, 2, parse.SANum, number);				// Sample Accession Number
+			outSheet->writeStr(outRow, 3, parse.patientID.c_str(), normal);	// Patient ID
+			outSheet->writeStr(outRow, 4, parse.visit.c_str(), normal);		// Visit
+			outSheet->writeStr(outRow, 5, parse.timepoint.c_str(), normal);	// Timepoint
+			CopyCell(4, outRow, col, 6);							// Sample Analysis Date 
+			CopyCell(6, outRow, col, 7);							// Gene RLF
+			CopyCell(row, outRow, 0, 8);							// Gene Classification
+			CopyCell(row, outRow, 1, 9);							// Gene Name
+			CopyCell(row, outRow, 2, 10);						// Reference Sequence Number
+			CopyCell(row, outRow, col, 11);						// Normalized Nanostring Data
+			
+			outRow++;
+		}
+	}
+	//TODO: Column sorting
+}
+
+void sFormat::initCols()
+{
+	//Column Widths
+	outSheet->setCol(0, 1, 40);
 	outSheet->setCol(2, 6, 15);
 	outSheet->setCol(7, 7, 22);
 	outSheet->setCol(8, 8, 18);
 	outSheet->setCol(9, 9, 15);
 	outSheet->setCol(10, 11, 18);
 
+	//Column Headers
 	outSheet->writeStr(0, 0, L"Source File Name", header);
 	outSheet->writeStr(0, 1, L"Sample ID", header);
 	outSheet->writeStr(0, 2, L"Sample Accession Number", header);
@@ -108,33 +140,6 @@ void sFormat::CopySheet()
 	outSheet->writeStr(0, 9, L"Gene Name", header);
 	outSheet->writeStr(0, 10, L"RefSeq Number", header);
 	outSheet->writeStr(0, 11, L"Normalized Nanostring Data", header);
-
-	int outRow = 1;
-	for (int col = 3; col < srcSheet->lastFilledCol(); col++)
-	{
-		parsedSample parse(srcSheet->readStr(2, col));
-		for (int row = 15; row < srcSheet->lastFilledRow(); row++)
-		{
-			CopyCell(0, outRow, col, 0);				// Source File Name
-
-			outSheet->writeStr(outRow, 1, parse.sampleID.c_str(), normal);		// Sample ID
-			outSheet->writeNum(outRow, 2, parse.SANum, number);				// Sample Accession Number
-			outSheet->writeStr(outRow, 3, parse.patientID.c_str(), normal);	// Patient ID
-			outSheet->writeStr(outRow, 4, parse.visit.c_str(), normal);		// Visit
-			outSheet->writeStr(outRow, 5, parse.timepoint.c_str(), normal);	// Timepoint
-
-			CopyCell(4, outRow, col, 6);				// Sample Analysis Date 
-			CopyCell(6, outRow, col, 7);				// Gene RLF
-			CopyCell(row, outRow, 0, 8);				// Gene Classification
-			CopyCell(row, outRow, 1, 9);				// Gene Name
-			CopyCell(row, outRow, 2, 10);			// Reference Sequence Number
-			CopyCell(row, outRow, col, 11);			// Normalized Nanostring Data
-			
-			outRow++;
-		}
-	}
-
-	//TODO: Column sorting
 }
 
 void sFormat::CopyCell(int row, int col)

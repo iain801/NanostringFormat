@@ -41,7 +41,7 @@ private:
 	void CopyCell(int row, int col);
 	void CopyCell(int srcRow, int destRow, int srcCol, int destCol);
 	int getSheet(libxl::Book* book, std::wstring label);
-
 	void initFormats();
+	void initCols();
 };
 
